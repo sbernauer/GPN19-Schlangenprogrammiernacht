@@ -1,44 +1,42 @@
 --- SURVIVER WITH CLUSTER SEARCH!!!
 function init()
     self.colors = { 0xFF0000, 0xFF7F00, 0xFFFF0, 0x00FF00, 0x0000FF, 0x4B0082, 0x9400D3 }
-    returnValueLastOne = 0
-    returnValueSecondOne = 0
-    escapeFromCircle = 0
+    maxFoodSeen = 0
 end
 
 function step()
-    log(string.format("My segment_radius: %.4f sight_radius: %.4f consume_radius: %.4f", self.segment_radius, self.sight_radius, self.consume_radius))
-
-    if(escapeFromCircle > 0) then
-        escapeFromCircle = escapeFromCircle - 1
-        return 0
-    end
+    -- log(string.format("My segment_radius: %.4f sight_radius: %.4f consume_radius: %.4f", self.segment_radius, self.sight_radius, self.consume_radius))
 
     local food = findFood(self.sight_radius, 0.8)
 
     local movingX = 0
     local movingY = 0
 
-    for i, item in pairs(food) do
+    -- log(string.format("Found %d food with sight %f. max: %f", #food, self.sight_radius, maxFoodSeen))
+    -- If there is not enoguh food go where else
+    maxFoodSeen = math.max(maxFoodSeen, #food)
+    -- if((#food < 10 and #food <= (0.4 * maxFoodSeen - 1)) or (maxFoodSeen < 10 and #food <= 1)) then
+    if (#findFood(60, 0.8) <= 1)
+        log(string.format("Runnaway when seen %d food, maxfood: %d", #food, maxFoodSeen))
+        return 0
+    end
 
+    for i, item in pairs(food) do
         local distance = item.dist
         local direction = item.d
         local mass = item.v
 
-        movingX = movingX + (math.sin(direction) * (1 / (distance)) * mass)
-        movingY = movingY + (math.cos(direction) * (1 / (distance)) * mass)
+        local directionCost = math.abs(direction)
+        local distanceCost = 1 / distance
+
+        -- log(string.format("distancecost %f direction %f", distanceCost, directionCost))
+
+        local totalCost = mass * distanceCost * directionCost
+
+        movingX = movingX + (math.sin(direction) * totalCost)
+        movingY = movingY + (math.cos(direction) * totalCost)
     end
     local finalRotation = math.atan(movingX, movingY)
-    -- Check if finalRotation is 90 degreee to left or right, so it would cause a loop
-    -- TODO 
-    -- Check if running in circle
-    if (returnValueSecondOne == finalRotation and finalRotation ~= 0) then
-        escapeFromCircle = 30
-        return 0
-    end
-    
-    -- Keep track of the last rotations
-    returnValueSecondOne = returnValueLastOne
-    returnValueLastOne = finalRotation
+
     return finalRotation
 end
