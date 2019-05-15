@@ -1,0 +1,10 @@
+Surviver_Julia
+Surviver_Seb
+Surviver_Marco
+Surviver_Malte
+Feeder_NomNom
+Feeder_Yummy
+Feeder_Mum
+Killer_Rambo
+Killer_Rex
+Killer_Snake
